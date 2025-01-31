@@ -23,3 +23,17 @@ nav li a:hover{
     text-decoration: none;
     color: purple;
 }
+.addEmp li a:hover{
+    text-decoration: none;
+    color: purple;
+}
+.addEmp li a{
+    color: black;
+    text-decoration: none;
+    font: bold;
+    padding: 5px 8px;
+}
+.addEmp li{
+    list-style: none;
+}
+

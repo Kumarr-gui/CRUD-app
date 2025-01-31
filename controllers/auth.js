@@ -1,16 +1,9 @@
 const mysql = require('mysql');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-
-const db = mysql.createConnection({
-    host: process.env.HOST,
-    user: process.env.USER,
-    password:process.env.PASSWORD,
-    database: process.env.DATABASE
-})
+const db = require('../db'); 
 
 exports.register = async (req,res) => {
-    console.log(req.body,">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  ")
 //destructuring
     const {name ,email, password, passwordConfirm } = req.body;
 
@@ -39,8 +32,6 @@ exports.register = async (req,res) => {
         message: 'Error while encrypting password',
     });
 }
-
-
 db.query(
     'INSERT INTO users SET ?',
     { name: name, email: email, password: hashedPassword },
@@ -65,7 +56,6 @@ exports.login = async (req, res) => {
         console.log(req.body);
         const { email, password } = req.body;
         if (!email || !password) {
-            // return res.status(400).send('Please provide email and password');
             return res.render('login', {
                 message: 'Please enter your details',
             });
@@ -86,11 +76,57 @@ exports.login = async (req, res) => {
                     message: 'Email or Password is not correct',
                 });
             }
-            // Successful login - redirect or respond accordingly
             res.redirect('/inner');
         });
     } catch (err) {
         console.error('Error during login:', err);
         res.status(500).send('An internal server error occurred');
+    }
+};
+
+
+
+//---------------------------------------------------------------------------------------------------
+//employee registration after login
+const { promisify } = require('util');
+exports.employeeRegister = async (req, res) => {
+    try {
+        console.log(req.body);
+        const { name, email, phone, department } = req.body;
+        if (!name || !email || !phone || !department) {
+            return res.render('employeeRegister', {
+                message: 'Please enter all required details',
+            });
+        }
+db.query('SELECT email FROM employees WHERE email = ?',[email],async (err, results) => {
+    if(err){
+        console.log(err)
+        return res.render('employeeRegister',{message: 'Database error'})
+    }
+    if(results.length > 0){
+        return res.render('employeeRegister', {
+            message: 'Email is already in use',
+    });
+}
+})
+        // Check if email already exists
+        /**/
+        // const emailExists = await query('SELECT email FROM employees WHERE email = ?', [email]);
+        // if (emailExists.length > 0) {
+        //     console.log(emailExists)
+        //     return res.render('employeeRegister', { message: 'Email is already in use' });
+        // }
+        // Check if employee already exists by phone
+        // const phoneExists = await query('SELECT phone FROM employees WHERE phone = ?', [phone]);
+        // if (phoneExists.length > 0) {
+        //     return res.render('employeeRegister', { message: 'Phone number is already registered' });
+        // }
+        // Insert new employee
+        await db.query('INSERT INTO employees SET ?', { name, email, phone, department });
+        return res.render('employeeRegister', { message: 'Employee registered successfully' });
+
+    } catch (error) {
+        console.error(error);
+        return res.render('employeeRegister', { message: 'Server error. Please try again.' });
     }
 };
