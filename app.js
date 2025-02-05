@@ -135,6 +135,27 @@ app.get("/employees", (req, res) => {
 });
 
 
+//Search functionality
+app.get('/employees/search', (req, res) =>{
+  try{
+    //in try we have to collect the data using query
+    const query = req.query.q;
+    const SQL = "SELECT * FROM employees WHERE name LIKE ? OR email LIKE ? or phone LIKE ?";
+    db.query(SQL,[`%${query}%`,`%${query}%`,`%${query}%`], (err, result) =>{
+      if(result.length === 0){
+         res.status(200).json({message : "No matching record found",length: result.length});
+      }
+      res.render("employees",{
+        employees: result,
+        currentPage: 1, 
+        totalPages: 1,
+      });
+    });
+  }catch(err){
+    res.status(500).json({error: "Failed to search"})
+  };
+});
+
 
 app.listen(process.env.PORT,()=>{
 console.log('Server started')

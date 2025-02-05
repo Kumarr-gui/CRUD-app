@@ -11,16 +11,28 @@
 <nav>
     <h4>Welcome, User</h4>
     <ul>
-        <li><a href="/">Logout</a></li>
+        <li><a href="/">Login</a></li>
     </ul>
 </nav>
 <br>
+<div class="searchbtn">
+<form action="/employees/search" method="get"class="d-flex mb-4">
+    &nbsp; &nbsp;<input type="text" name="q" placeholder="Search..."  value="{{query}}"/>
+    <button type="submit">Search</button>
+    </form>
+    </div>
+    <div class="filterbtn">
+        <form action="/employees">
+        <button>Clear Search</button>
+        </form>
+    </div>
 <div class="addEmp">
     <ul>
         <li><button><a href="/employeeRegister">Add Employee</a></button></li>
     </ul>
 </div> 
-
+<br>
+<br>
 <table class="table">
     <tr>
         <th>ID</th>
@@ -53,7 +65,7 @@
 
 {{!-- // for pagination--}}
 <footer>
-    <div class="pagination">
+    <div class="pagination">    
         &nbsp;
         {{#if (gt currentPage 1)}}
          <button><a href="/employees?page={{subtract currentPage 1}}" id="prevbtn" class="btn">Previous</a></button>

@@ -13,6 +13,7 @@ nav ul{
 nav li{
     list-style: none;
 }
+
 nav li a{
     color: white;
     text-decoration: none;
@@ -31,8 +32,19 @@ nav li a:hover{
     color: black;
     text-decoration: none;
     font: bold;
-    padding: 5px 8px;
+    padding: 5px 5px;
 }
 .addEmp li{
     list-style: none;
+    border-right: 20px;
+}
+.searchbtn{
+    border-left: 1090px solid white;
+}
+.filterbtn{
+    border-left: 1250px solid white;
+}
+
+.editform{
+    text-align: center;
 }
