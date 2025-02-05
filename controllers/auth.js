@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const db = require('../db'); 
 
 exports.register = async (req,res) => {
+    
 //destructuring
     const {name ,email, password, passwordConfirm } = req.body;
 
@@ -32,6 +33,8 @@ exports.register = async (req,res) => {
         message: 'Error while encrypting password',
     });
 }
+
+//query to insert data into users
 db.query(
     'INSERT INTO users SET ?',
     { name: name, email: email, password: hashedPassword },
@@ -47,10 +50,10 @@ db.query(
                 message: 'User registered successfully',
             });
         }
-    }
-);
+    });
 });
 };
+
 exports.login = async (req, res) => {
     try {
         console.log(req.body);
@@ -76,7 +79,7 @@ exports.login = async (req, res) => {
                     message: 'Email or Password is not correct',
                 });
             }
-            res.redirect('/inner');
+            res.redirect('/employees');
         });
     } catch (err) {
         console.error('Error during login:', err);
@@ -109,20 +112,7 @@ db.query('SELECT email FROM employees WHERE email = ?',[email],async (err, resul
     });
 }
 })
-        // Check if email already exists
-        /**/
-        // const emailExists = await query('SELECT email FROM employees WHERE email = ?', [email]);
-        // if (emailExists.length > 0) {
-        //     console.log(emailExists)
-        //     return res.render('employeeRegister', { message: 'Email is already in use' });
-        // }
-        // Check if employee already exists by phone
-        // const phoneExists = await query('SELECT phone FROM employees WHERE phone = ?', [phone]);
-        // if (phoneExists.length > 0) {
-        //     return res.render('employeeRegister', { message: 'Phone number is already registered' });
-        // }
-        // Insert new employee
-        await db.query('INSERT INTO employees SET ?', { name, email, phone, department });
+    await db.query('INSERT INTO employees SET ?', { name, email, phone, department });
         return res.render('employeeRegister', { message: 'Employee registered successfully' });
 
     } catch (error) {

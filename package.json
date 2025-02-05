@@ -2,6 +2,7 @@
   "name": "project_02",
   "version": "1.0.0",
   "main": "app.js",
+  "proxy":"localhost:8000",
   "scripts": {
     "start": "nodemon app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
