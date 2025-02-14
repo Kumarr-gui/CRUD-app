@@ -2,8 +2,14 @@ const express = require('express');
 const mysql = require('mysql');
 const dotenv = require('dotenv');
 const path = require('path');
+var jwt = require('jsonwebtoken');
 const publicDirectory = path.join(__dirname,'./public')
 const db = require('./db'); 
+var cookieParser = require('cookie-parser')
+const router = express.Router();
+
+
+
 
 dotenv.config({path:'./.env'});
 
@@ -13,6 +19,7 @@ app.set('views', './views');
 app.use(express.static(publicDirectory));
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
+app.use(cookieParser());
 
 const hbs = require('hbs');
 
@@ -26,6 +33,7 @@ db.connect((error)=>{
 })
 
 app.use('/',require('./routes/pages'));
+
 app.use('/auth', require('./routes/auth'));
   
   // Route to delete an employee
@@ -52,13 +60,13 @@ app.use('/auth', require('./routes/auth'));
   });
 
 // for pagination fetching all the data from the database in a single variable
-  app.get("/data", (req, res) => {
-    const response = db.query("SELECT * FROM employees", (err, results) => {
-      if (err) throw err;
-      // return res.json("employees", { employees: results });
-      return res.status(200).json({employees :results})
-    });
-  });
+  // app.get("/data", (req, res) => {
+  //   const response = db.query("SELECT * FROM employees", (err, results) => {
+  //     if (err) throw err;
+  //     // return res.json("employees", { employees: results });
+  //     return res.status(200).json({employees :results})
+  //   });
+  // });
 
 
   // Route to show the edit form
@@ -69,7 +77,6 @@ app.get('/edit/:id', (req, res) => {
           console.log(err);
           return res.status(500).send('Error retrieving employee');
       }
-
       res.render('editEmployee', {
           employee: result[0]
       });
@@ -91,22 +98,23 @@ app.post('/update/:id', (req, res) => {
 });
 
 
-  // Register custom helpers for hbs
+
+// Register custom helpers for hbs
+
+//pagination
 hbs.registerHelper('subtract', function (a, b) {
   return a - b;
 });
-
 hbs.registerHelper('add', function (a, b) {
   return a + b;
 });
-
 hbs.registerHelper('gt', function (a, b) {
   return a > b;
 });
-
 hbs.registerHelper('lt', function (a, b) {
   return a < b;
 });
+
 
 app.get("/employees", (req, res) => {
     const page = parseInt(req.query.page) || 1;  
@@ -122,9 +130,8 @@ app.get("/employees", (req, res) => {
                 console.log(err);
                 return res.status(500).send('Error counting data');
             }
-
             const totalEmployees = countResult[0].count;
-            const totalPages = Math.ceil(totalEmployees / limit);
+            const totalPages = 5;
             res.render("employees", {
                 employees: results,
                 currentPage: page,
@@ -138,7 +145,7 @@ app.get("/employees", (req, res) => {
 //Search functionality
 app.get('/employees/search', (req, res) =>{
   try{
-    //in try we have to collect the data using query
+    //in this try we have to collect the data using query
     const query = req.query.q;
     const SQL = "SELECT * FROM employees WHERE name LIKE ? OR email LIKE ? or phone LIKE ?";
     db.query(SQL,[`%${query}%`,`%${query}%`,`%${query}%`], (err, result) =>{
@@ -158,5 +165,5 @@ app.get('/employees/search', (req, res) =>{
 
 
 app.listen(process.env.PORT,()=>{
-console.log('Server started')
+console.log('\nServer started\n')
 })
