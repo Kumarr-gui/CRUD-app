@@ -1,9 +1,9 @@
 nav{
     background-color: gray  ;
     color: white;
-    padding: 30px 60px;
+    padding: 30px 50px;
     display: flex;
-    justify-content: space-between;
+    justify-content: space-between;  
 }
 nav ul{
     display: flex;
@@ -39,12 +39,46 @@ nav li a:hover{
     border-right: 20px;
 }
 .searchbtn{
-    border-left: 1090px solid white;
+    margin-left: 1090px;
 }
 .filterbtn{
-    border-left: 1250px solid white;
-}
+    margin-left: 1240px;
+}   
 
 .editform{
     text-align: center;
+}
+.class-header{
+    text-align: center;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+.index-bg{
+    background-image: url('images/fp.jpeg');
+}
+.card{
+    /* border-radius: black; */
+    background-color: transparent;
+    backdrop-filter: blur(8px);
+    width: 50%;
+    /* align-items: center; */
+    margin-left: 25%;
+}
+.clickbtn{
+    background-color: gray;
+    width: 522px;
+    height: 35px;
+}
+.blurbg{
+    background-image: url('images/fp.jpeg');
+    background-color: transparent;
+    backdrop-filter: blur(8px);
+}
+.index-bg-editEmployee{
+    background-image: url('images/fp.jpeg');
+    background-color: transparent;
+    backdrop-filter: blur(10px);    
+
+}
+.editformlabel{
+    margin-left: 90px;
 }

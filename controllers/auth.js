@@ -1,21 +1,13 @@
 const mysql = require('mysql');
-const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const db = require('../db');    
-const app = express();
-const { cookiesJwtAuth } = require ('../middlewares/auth.js')
-// const { v4: uuidv4 } = require('uuid');
-// const {setUser} = require('../services/auth')
-const dotenv = require('dotenv');
-dotenv.config({path:'./.env'});
+const db = require('../db'); 
 
-
-
-// registering the new user
 exports.register = async (req,res) => {
+    
 //destructuring
     const {name ,email, password, passwordConfirm } = req.body;
+
     db.query('SELECT email FROM users WHERE email = ?', [email],async (err, results) =>{
         if(err){
             console.log(err);
@@ -23,7 +15,7 @@ exports.register = async (req,res) => {
         }
         if(results.length > 0 ){
             return res.render('register',{
-                message : 'Email is already in use',
+                message : 'Email already exists!!! Try different email',
             })
         } else if( password !== passwordConfirm){
             return res.render('register',{
@@ -33,7 +25,7 @@ exports.register = async (req,res) => {
     let hashedPassword
     try {
         hashedPassword = await bcrypt.hash(password, 8);
-        console.log('Hashed Password', hashedPassword);
+        // console.log('Hashed Password', hashedPassword);
     } 
     catch(error){
     console.log(error);
@@ -41,8 +33,10 @@ exports.register = async (req,res) => {
         message: 'Error while encrypting password',
     });
 }
+
 //query to insert data into users
-db.query('INSERT INTO users SET ?',
+db.query(
+    'INSERT INTO users SET ?',
     { name: name, email: email, password: hashedPassword },
     (err, results) => {
         if (err) {
@@ -60,12 +54,9 @@ db.query('INSERT INTO users SET ?',
 });
 };
 
-
-
-// logging in the registered user only
-
 exports.login = async (req, res) => {
     try {
+        console.log(req.body);
         const { email, password } = req.body;
         if (!email || !password) {
             return res.render('login', {
@@ -78,7 +69,11 @@ exports.login = async (req, res) => {
                 return res.status(500).send('An internal server error occurred');
             }
             if (results.length === 0) {
-                return res.status(401).send('Email or Password is incorrect');
+                console.log('No user found for email',email);
+                return res.render('login',{
+                    message:'Email or password is incorrect',
+                    // return res.status(401).send('Email or Password is incorrect');
+                });
             }
             const user = results[0];
             const passwordMatch = await bcrypt.compare(password, user.password);
@@ -88,17 +83,18 @@ exports.login = async (req, res) => {
                     message: 'Email or Password is not correct',
                 });
             }
-            const token = jwt.sign({email:user.email, password:user.password},process.env.JWT_KEY,{expiresIn:'100s'});
-            // console.log("hi i am",token)
-            res.cookie("token",token,{
+            const token = jwt.sign({email:user.email, password:user.password},process.env.JWT_KEY,{expiresIn:'1h'});
+            // console.log('JWT token:',token);
+
+            res.cookie("token", token, {
                 httpOnly: true,
-            })
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'Lax',    
+                maxAge: 60 * 60 * 1000
+            });
+
+            console.log('Token cookie set');
             res.redirect('/employees');
-            // generating cookies
-            // const sessionId = uuidv4();
-            // setUser(sessionId,user)
-            // res.cookie('eId',sessionId)
-        
         });
     } catch (err) {
         console.error('Error during login:', err);
@@ -109,63 +105,33 @@ exports.login = async (req, res) => {
 
 
 //---------------------------------------------------------------------------------------------------
-//employee enrollment after login
-
+//employee registration after login
+// const { promisify } = require('util');
 exports.employeeRegister = async (req, res) => {
     try {
-        console.log(req.body);
+        // console.log(req.body);
         const { name, email, phone, department } = req.body;
-
         if (!name || !email || !phone || !department) {
             return res.render('employeeRegister', {
                 message: 'Please enter all required details',
             });
         }
-        // Check if email already exists in the users table
-        db.query('SELECT email FROM employees WHERE email = ?', [email], async (err, results) => {
-            if (err) {
-                console.log(err);
-                return res.render('employeeRegister', { message: 'Database error' });
-            }
-            if (results.length > 0) {
-                return res.render('employeeRegister', {
-                    message: 'Email is already in use',
-                });
-            }
-            try {
-                // Insert new employee into the database
-                await db.query('INSERT INTO employees SET ?', { name, email, phone, department });
-                return res.render('employeeRegister', { message: 'Employee registered successfully' });
-            } catch (error) {
-                console.error(error);
-                return res.render('employeeRegister', { message: 'Server error. Please try again.' });
-            }
-        });
+db.query('SELECT email FROM employees WHERE email = ?',[email],async (err, results) => {
+    if(err){
+        console.log(err)
+        return res.render('employeeRegister',{message: 'Database error'})
+    }
+    if(results.length > 0){
+        return res.render('employeeRegister', {
+            message: 'Email already exists!!! Try different email',
+    });
+}
+})
+    await db.query('INSERT INTO employees SET ?', { name, email, phone, department });
+        return res.render('employeeRegister', { message: 'Employee registered successfully' });
+
     } catch (error) {
         console.error(error);
-        return res.render('employeeRegister', { message: 'An unexpected error occurred. Please try again.' });
+        return res.render('employeeRegister', { message: 'Server error. Please try again.' });
     }
 };
-
-//to check if phone number already exist
-
-// db.query("SELECT phone FROM employees WHERE phone = ?"),[phone], async (err, results)=>{
-//     if(err){
-//         console.log(err);
-//         return res.render('employeeregister', { message: 'Database error' });
-//     }
-//     if (results.length > 0) {
-//         return res.render('employeeRegister', {
-//             message: 'Phone Number already exist.',
-//         });
-//     }
-//     try{
-//         await db.query('INSERT INTO employees SET ?', { name, email, phone, department });
-//             return res.render('employeeRegister', { message: 'Employee registered successfully' });
-//     }catch (error){
-//         console.error(error);
-//                 return res.render('employeeRegister', { message: 'Server error. Please try again.' });
-
-//     }
-// }
-

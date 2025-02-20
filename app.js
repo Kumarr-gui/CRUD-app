@@ -2,14 +2,10 @@ const express = require('express');
 const mysql = require('mysql');
 const dotenv = require('dotenv');
 const path = require('path');
-var jwt = require('jsonwebtoken');
 const publicDirectory = path.join(__dirname,'./public')
 const db = require('./db'); 
-var cookieParser = require('cookie-parser')
-const router = express.Router();
-
-
-
+const cookieParser = require('cookie-parser');
+const { cookiesJwtAuth} = require ('./middlewares/mwauth');
 
 dotenv.config({path:'./.env'});
 
@@ -28,12 +24,11 @@ db.connect((error)=>{
         console.log('Database connection failed',error);
     }   
     else{
-    console.log('Database connected')
+    console.log('Database connection succesfull')
     }
 })
 
 app.use('/',require('./routes/pages'));
-
 app.use('/auth', require('./routes/auth'));
   
   // Route to delete an employee
@@ -46,18 +41,18 @@ app.use('/auth', require('./routes/auth'));
   });
   
   // Route to update an employee (form submission)
-  app.post("/update/:id", (req, res) => {
-    const id = req.params.id;
-    const { name, email, phone ,department } = req.body;
-    db.query(
-      "UPDATE employees SET name = ?, email = ?, phone = ? , department = ?WHERE id = ?",
-      [name, email, phone,department, id],
-      (err, result) => {
-        if (err) throw err;
-        res.redirect("/employees");
-      }
-    );
-  });
+  // app.post("/update/:id", (req, res) => {
+  //   const id = req.params.id;
+  //   const { name, email, phone ,department } = req.body;
+  //   db.query(
+  //     "UPDATE employees SET name = ?, email = ?, phone = ? , department = ?WHERE id = ?",
+  //     [name, email, phone,department, id],
+  //     (err, result) => {
+  //       if (err) throw err;
+  //       res.redirect("/employees");
+  //     }
+  //   );
+  // });
 
 // for pagination fetching all the data from the database in a single variable
   // app.get("/data", (req, res) => {
@@ -77,6 +72,7 @@ app.get('/edit/:id', (req, res) => {
           console.log(err);
           return res.status(500).send('Error retrieving employee');
       }
+
       res.render('editEmployee', {
           employee: result[0]
       });
@@ -98,28 +94,31 @@ app.post('/update/:id', (req, res) => {
 });
 
 
-
-// Register custom helpers for hbs
-
-//pagination
+  // Register custom helpers for hbs
 hbs.registerHelper('subtract', function (a, b) {
   return a - b;
 });
+
 hbs.registerHelper('add', function (a, b) {
   return a + b;
 });
+
 hbs.registerHelper('gt', function (a, b) {
   return a > b;
 });
+
 hbs.registerHelper('lt', function (a, b) {
   return a < b;
 });
 
 
-app.get("/employees", (req, res) => {
-    const page = parseInt(req.query.page) || 1;  
-    const limit = 5; 
-    const offset = (page - 1) * limit;  
+app.get("/employees", cookiesJwtAuth, (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 5;
+    const offset = (page - 1) * limit;
+    if (!req.user) {
+        return res.redirect('/login');
+    }
     db.query("SELECT * FROM employees LIMIT ? OFFSET ?", [limit, offset], (err, results) => {
         if (err) {
             console.log(err);
@@ -131,7 +130,7 @@ app.get("/employees", (req, res) => {
                 return res.status(500).send('Error counting data');
             }
             const totalEmployees = countResult[0].count;
-            const totalPages = 5;
+            const totalPages = Math.ceil(totalEmployees / limit);
             res.render("employees", {
                 employees: results,
                 currentPage: page,
@@ -142,10 +141,11 @@ app.get("/employees", (req, res) => {
 });
 
 
+
 //Search functionality
 app.get('/employees/search', (req, res) =>{
   try{
-    //in this try we have to collect the data using query
+    //in try we have to collect the data using query
     const query = req.query.q;
     const SQL = "SELECT * FROM employees WHERE name LIKE ? OR email LIKE ? or phone LIKE ?";
     db.query(SQL,[`%${query}%`,`%${query}%`,`%${query}%`], (err, result) =>{
@@ -163,7 +163,7 @@ app.get('/employees/search', (req, res) =>{
   };
 });
 
-
+//server listening
 app.listen(process.env.PORT,()=>{
-console.log('\nServer started\n')
-})
+console.log(`\nServer running at Port ${process.env.PORT}`)
+});
