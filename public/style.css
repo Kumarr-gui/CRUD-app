@@ -82,3 +82,8 @@ nav li a:hover{
 .editformlabel{
     margin-left: 90px;
 }
+.clickbtn-editEmp{
+    background-color: gray;
+    width: 140px;
+    height: 35px;
+}

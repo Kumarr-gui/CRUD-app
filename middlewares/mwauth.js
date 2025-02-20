@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 
 exports.cookiesJwtAuth = (req, res, next) => {
     const token = req.cookies && req.cookies.token;
-    // console.log('Token is : ',token);
+    console.log('Token is : ',token);
     if (!token) {
         // return res.status(401).json({ message: 'Log in first' });
         return res.redirect('/login');

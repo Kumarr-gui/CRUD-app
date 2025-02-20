@@ -83,8 +83,8 @@ exports.login = async (req, res) => {
                     message: 'Email or Password is not correct',
                 });
             }
-            const token = jwt.sign({email:user.email, password:user.password},process.env.JWT_KEY,{expiresIn:'1h'});
-            // console.log('JWT token:',token);
+            const token = jwt.sign({email:user.email, password:user.password},process.env.JWT_KEY,{expiresIn:'1000s'});
+            console.log('JWT token:',token);
 
             res.cookie("token", token, {
                 httpOnly: true,

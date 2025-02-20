@@ -8,39 +8,41 @@
 </head>
 <body class="index-bg-editEmployee">
 <nav>
-    <h4>Update Employee details</h4>
+    <h4>Update details</h4>
     <ul>
-        <li><a href="/">Logout</a></li>
+        <li><a href="/">Log-out</a></li>
     </ul>
 </nav>
-
-
+<br>
+<br>
 <form action="/update/{{employee.id}}" method="POST">
   <div class="editForm">
     <div class="form-group">
-            <label for="name"><b>Name</b></label>
+            <label for="name"><b>Name:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b></label>
             <input type="text" id="name" name="name" value="{{employee.name}}" required>
         </div>
         <br>
         <div class="form-group">
-            <label for="email"><b>Email</b></label>
+            <label for="email"><b>Email:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b></label>
             <input type="email" id="email" name="email" value="{{employee.email}}" required>
         </div>
         <br>
         <div class="form-group">
-            <label for="phone"><b>Phone</b></label>
+            <label for="phone"><b>Phone:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b></label>
             <input type="text" id="phone" name="phone" value="{{employee.phone}}" required>
         </div>
         <br>
         <div class="form-group">
-            <label for="department"><b>Department</b></label>
+            <label for="department"><b>Department:</b></label>
             <input type="text" id="department" name="department" value="{{employee.department}}" required>
         </div>
         <br>
-        <button class="clickbtn-editEmployee" type="submit" >Update Employee</button>
-    </div>
+        <form action="/views/employees.hbs">
+        <button class="clickbtn-editEmp" type="submit">Back</button>
+        </form>
+        <button class="clickbtn-editEmp" type="submit" >Update</button>
+        </div>
 </form>
-
 {{!-- <div class="editForm">
     <form action="/update/{{employee.id}}" method="POST">
         <div class="form-group">
